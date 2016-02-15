@@ -9,6 +9,7 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/pdxjohnny/go-json-rest-middleware-jwt"
 
+	dbAPI "github.com/pdxjohnny/s-db/api"
 	dbVariables "github.com/pdxjohnny/s-db/db/variables"
 	"github.com/pdxjohnny/s/token"
 	"github.com/pdxjohnny/s/variables"
@@ -22,7 +23,7 @@ func CreateAuthMiddleware() (*jwt.Middleware, error) {
 	}
 
 	authMiddleware := &jwt.Middleware{
-		Realm:            "numapp",
+		Realm:            token.AuthRealm,
 		SigningAlgorithm: token.SigningAlgorithm,
 		Key:              token.TokenSignKey,
 		VerifyKey:        token.TokenVerifyKey,
@@ -39,11 +40,19 @@ func CreateAuthMiddleware() (*jwt.Middleware, error) {
 func MakeHandler() *http.Handler {
 	api := rest.NewApi()
 
+	// Create the geospcail index on the data
+	// FIXME: The collection is currently specified by the client
+	collection := "thing"
+	_, err := dbAPI.Index(variables.ServiceDBURL, token.BackendToken, collection, "location", "2dsphere")
+	if err != nil {
+		log.Println("ERROR setting index:", err)
+	}
+
 	// Make sure we want to enable auth
 	if variables.EnableAuth != false {
 		authMiddleware, err := CreateAuthMiddleware()
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		api.Use(&rest.IfMiddleware{
@@ -56,9 +65,10 @@ func MakeHandler() *http.Handler {
 	}
 	api.Use(rest.DefaultProdStack...)
 	router, err := rest.MakeRouter(
-		// For accounts, looking up and updating
-		rest.Get(dbVariables.APIPathSaveServer, GetDoc),
-		rest.Get(dbVariables.APIPathGetSaveServer, GetSaveDoc),
+		// For checking what is near a location
+		rest.Post(dbVariables.APIPathNearServer, PostNear),
+		// For geting and saving things
+		rest.Get(dbVariables.APIPathGetServer, GetDoc),
 		rest.Post(dbVariables.APIPathSaveServer, PostSaveDoc),
 		// // For user actions such as login
 		// rest.Post(variables.APIPathLoginUserServer, PostLoginUser),

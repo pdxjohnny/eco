@@ -3,6 +3,7 @@ web:
   command: /app/run http
   environment:
     SERVICE_PROTOCOL: "http"
+    ENABLE_AUTH: "false"
   volumes:
     - "./static:/app/static"
   ports:
@@ -14,6 +15,7 @@ db:
   command: /app/run db
   environment:
     SERVICE_PROTOCOL: "http"
+    ENABLE_AUTH: "false"
   expose:
     - "8080"
   links:
