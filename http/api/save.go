@@ -16,9 +16,13 @@ import (
 // PostSaveDoc uses get to retrive a document
 func PostSaveDoc(w rest.ResponseWriter, r *rest.Request) {
 	var recvDoc map[string]interface{}
+	var longitude float64
+	var latitude float64
+	var err error
+
 	collection := r.PathParam("collection")
 	id := r.PathParam("id")
-	err := r.DecodeJsonPayload(&recvDoc)
+	err = r.DecodeJsonPayload(&recvDoc)
 	if err != nil {
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -27,13 +31,29 @@ func PostSaveDoc(w rest.ResponseWriter, r *rest.Request) {
 	// https://docs.mongodb.org/manual/reference/geojson/
 	// { type: "Point", coordinates: [ 40, 5 ] }
 	// Always list coordinates in longitude, latitude order.
-	longitude, err := strconv.ParseFloat(recvDoc["longitude"].(string), 64)
-	if err != nil {
+	switch recvDoc["longitude"].(type) {
+	case string:
+		longitude, err = strconv.ParseFloat(recvDoc["longitude"].(string), 64)
+		if err != nil {
+			rest.Error(w, "longitude needs to be a float", http.StatusInternalServerError)
+			return
+		}
+	case float64:
+		longitude = recvDoc["longitude"].(float64)
+	default:
 		rest.Error(w, "longitude needs to be a float", http.StatusInternalServerError)
 		return
 	}
-	latitude, err := strconv.ParseFloat(recvDoc["latitude"].(string), 64)
-	if err != nil {
+	switch recvDoc["latitude"].(type) {
+	case string:
+		latitude, err = strconv.ParseFloat(recvDoc["latitude"].(string), 64)
+		if err != nil {
+			rest.Error(w, "latitude needs to be a float", http.StatusInternalServerError)
+			return
+		}
+	case float64:
+		latitude = recvDoc["latitude"].(float64)
+	default:
 		rest.Error(w, "latitude needs to be a float", http.StatusInternalServerError)
 		return
 	}
