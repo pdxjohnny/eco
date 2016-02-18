@@ -1,35 +1,23 @@
-Docker Go Base
+Eco
 ---
 
-This repo is meant to be used as a starting point for go projects
+The purpose of this tool is to provide a way to map an ecosystem.
 
-It uses docker to compile the binaries and the main Dockerfile adds the linux
-binary to the busybox image to create an extremely small final image
-
-Building
+Current Functionality
 ---
 
-```bash
-go build -o eco_linux-amd64 -tags netgo *.go
-# Or
-./script/build
-```
-> `-tags netgo` will help you achieve static binaries :)
+* Place markers at points of interest. Markers have several attributes.
+ * Name
+ * Description
+ * longitude and latitude
+* Find markers within a distance of a location
 
-Running
+TODO
 ---
 
-```bash
-./eco_linux-amd64
-docker run --rm -ti pdxjohnny/eco
-```
-
-Changing The Name
----
-
-```bash
-./script/change-name $GITHUB_USERNAME $PROJECT_NAME
-```
-
-
-- John Andersen
+* Add user accounts
+* Client to store data on users devices so I don't have to store their data sets
+* Per user maps -> pdxjohnny/frogs
+* Public vs. Private maps, Share maps with some users give some write access
+* Custom parameters
+* Find markers which match a parameter
