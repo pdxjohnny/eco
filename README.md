@@ -21,3 +21,12 @@ TODO
 * Public vs. Private maps, Share maps with some users give some write access
 * Custom parameters
 * Find markers which match a parameter
+
+Building
+---
+
+```bash
+go build -tags netgo . && \
+docker-compose build && \
+docker-compose up
+```
